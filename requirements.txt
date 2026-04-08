@@ -1,0 +1,6 @@
+numpy>=1.24
+pytest>=7.0
+dataclasses-json>=0.6
+matplotlib>=3.7
+opencv-python>=4.10
+pyyaml>=6.0

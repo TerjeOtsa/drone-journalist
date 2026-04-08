@@ -1,0 +1,22 @@
+# Heavy wind: sustained strong wind throughout the flight
+name: heavy_wind
+description: >
+  Verifies the drone can handle strong sustained wind without crashing.
+  Stability should degrade but the drone must survive and land.
+
+duration: 60.0
+dt: 0.02
+seed: 77
+
+events:
+  - { time: 0.0,  action: start }
+  - { time: 2.0,  action: lock }
+  - { time: 5.0,  action: wind, params: { speed: [7.0, 5.0, 0.0] } }
+  - { time: 8.0,  action: walk, params: { speed: 1.0, dir: [1, 0, 0] } }
+  - { time: 45.0, action: stop }
+
+assertions:
+  - { metric: max_wind,      op: gte,  value: 5.0 }
+  - { metric: min_battery,   op: gte,  value: 5.0 }
+  - { metric: final_state,   op: in,   value: [return, land, idle] }
+  - { metric: state_count,   op: gte,  value: 3 }

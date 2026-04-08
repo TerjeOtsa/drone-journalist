@@ -1,0 +1,22 @@
+# Walking subject: long walk-and-talk follow
+name: walking_follow
+description: >
+  Extended walk-and-talk follow. Verifies sustained filming percentage
+  and distance tracking during a walking scenario.
+
+duration: 60.0
+dt: 0.02
+seed: 33
+
+events:
+  - { time: 0.0,  action: start }
+  - { time: 2.0,  action: lock }
+  - { time: 4.0,  action: walk, params: { speed: 1.4, dir: [1, 0.2, 0] } }
+  - { time: 5.0,  action: shot, params: { mode: walk_and_talk } }
+  - { time: 50.0, action: stop }
+
+assertions:
+  - { metric: filming_percent,  op: gte, value: 20.0 }
+  - { metric: locked_percent,   op: gte, value: 20.0 }
+  - { metric: min_battery,      op: gte, value: 10.0 }
+  - { metric: final_state,      op: in,  value: [return, land, idle] }

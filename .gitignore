@@ -1,0 +1,17 @@
+# Python cache and local tooling artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# Session and simulator outputs
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.jsonl
+*.ndjson

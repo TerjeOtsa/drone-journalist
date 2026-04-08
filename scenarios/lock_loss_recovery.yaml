@@ -1,0 +1,22 @@
+# Lock-loss recovery: repeated lock losses during filming
+name: lock_loss_recovery
+description: >
+  Tests that the drone degrades gracefully on lock loss and recovers
+  when the subject becomes visible again.
+
+duration: 50.0
+dt: 0.02
+seed: 55
+
+events:
+  - { time: 0.0,  action: start }
+  - { time: 2.0,  action: lock }
+  - { time: 5.0,  action: walk, params: { speed: 1.0, dir: [1, 0, 0] } }
+  - { time: 12.0, action: lost, params: { duration: 3.0 } }
+  - { time: 20.0, action: lost, params: { duration: 5.0 } }
+  - { time: 35.0, action: stop }
+
+assertions:
+  - { metric: state_count,   op: gte, value: 4 }
+  - { metric: min_battery,   op: gte, value: 20.0 }
+  - { metric: final_state,   op: in,  value: [return, land, idle, degrade] }

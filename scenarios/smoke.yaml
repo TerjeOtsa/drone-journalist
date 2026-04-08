@@ -1,0 +1,28 @@
+# Smoke test: default scenario completes, films, lands safely
+name: smoke
+description: >
+  Run the default scenario end-to-end.
+  Verifies the drone takes off, films, handles wind and lock-loss,
+  and lands with battery remaining.
+
+duration: 70.0
+dt: 0.02
+seed: 42
+
+events:
+  - { time: 0.0,  action: start }
+  - { time: 3.0,  action: lock }
+  - { time: 8.0,  action: walk, params: { speed: 1.2, dir: [1, 0.3, 0] } }
+  - { time: 14.0, action: shot, params: { mode: walk_and_talk } }
+  - { time: 20.0, action: wind, params: { speed: [3.0, 2.0, 0.0] } }
+  - { time: 28.0, action: lost, params: { duration: 4.0 } }
+  - { time: 36.0, action: shot, params: { mode: orbit } }
+  - { time: 45.0, action: wind, params: { speed: [9.0, 4.0, 0.0] } }
+  - { time: 52.0, action: wind, params: { speed: [0.0, 0.0, 0.0] } }
+  - { time: 58.0, action: stop }
+
+assertions:
+  - { metric: filming_percent,  op: gte, value: 5.0 }
+  - { metric: min_battery,      op: gte, value: 5.0 }
+  - { metric: state_count,      op: gte, value: 4 }
+  - { metric: final_state,      op: in,  value: [return, land, idle] }
