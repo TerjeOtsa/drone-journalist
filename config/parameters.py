@@ -7,8 +7,9 @@ Adjust these for flight testing; the code never contains magic numbers.
 """
 
 from __future__ import annotations
+
 from dataclasses import dataclass, field
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from flight.geofence import GeofenceConfig

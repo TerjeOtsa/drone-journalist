@@ -4,6 +4,9 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+*.egg-info/
+dist/
+build/
 
 # Virtual environments
 .venv/
@@ -15,3 +18,11 @@ venv/
 *.sqlite-wal
 *.jsonl
 *.ndjson
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor local state (settings.json is committed, but user-specific state is not)
+.vscode/*.log
+.vscode/.ropeproject/

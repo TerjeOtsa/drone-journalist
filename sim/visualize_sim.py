@@ -22,7 +22,6 @@ from matplotlib.animation import FuncAnimation
 
 from sim.sim_harness import run_simulation
 
-
 LOCK_COLORS = {
     "candidate": "#f4a261",
     "locked": "#2a9d8f",
@@ -100,7 +99,7 @@ def visualize_simulation(
     ax_map.grid(True, alpha=0.25)
     _set_equal_bounds(ax_map, drone_x + subj_x + [0.0], drone_y + subj_y + [0.0])
 
-    home = ax_map.scatter([0.0], [0.0], marker="x", s=80, color="black", label="Home")
+    ax_map.scatter([0.0], [0.0], marker="x", s=80, color="black", label="Home")
     drone_dot = ax_map.scatter([], [], s=90, color="#1d3557", label="Drone")
     subject_dot = ax_map.scatter([], [], s=90, color="#d62828", label="Subject")
     drone_path, = ax_map.plot([], [], color="#457b9d", lw=1.5, alpha=0.7)

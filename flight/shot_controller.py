@@ -28,13 +28,13 @@ from typing import Optional
 from config.parameters import MissionParams, SafetyParams, ShotParams
 from interfaces.clock import Clock, SystemClock
 from interfaces.schemas import (
+    DroneTelemetry,
     FlightSetpoint,
     LockState,
     MissionState,
     SafetyOverride,
     ShotMode,
     TargetTrack,
-    DroneTelemetry,
     Vec3,
 )
 

@@ -6,6 +6,7 @@ as a parameterised test case.
 """
 
 import pathlib
+
 import pytest
 
 from sim.regression_runner import discover_scenarios, load_scenario, run_scenario

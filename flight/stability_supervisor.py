@@ -26,7 +26,6 @@ from interfaces.clock import Clock, SystemClock
 from interfaces.event_bus import bus
 from interfaces.schemas import (
     DroneTelemetry,
-    SafetyOverride,
     StabilityLevel,
     SystemEvent,
     Vec3,
@@ -83,7 +82,7 @@ class StabilitySupervisor:
         # Worst of all three assessments
         new_level = max(
             wind_level, jitter_level, drift_level,
-            key=lambda l: list(StabilityLevel).index(l),
+            key=lambda lv: list(StabilityLevel).index(lv),
         )
 
         if new_level != self.level:

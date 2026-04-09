@@ -2,9 +2,7 @@
 Unit tests for the Safety & Geofence Module.
 """
 
-import math
 import time
-import pytest
 
 from config.parameters import SafetyParams
 from flight.safety_module import SafetyModule

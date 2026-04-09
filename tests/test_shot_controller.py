@@ -4,13 +4,13 @@ Unit tests for the Shot Controller.
 
 import math
 import time
+
 import pytest
 
 from config.parameters import MissionParams, SafetyParams, ShotParams
 from flight.shot_controller import ShotController
 from interfaces.schemas import (
     DroneTelemetry,
-    FlightSetpoint,
     LockState,
     MissionState,
     SafetyOverride,

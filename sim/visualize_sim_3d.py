@@ -36,14 +36,13 @@ elif "--snapshot" in sys.argv or "--gif" in sys.argv:
 
     matplotlib.use("Agg")
 
-import matplotlib.pyplot as plt
-import numpy as np
-from matplotlib.animation import FuncAnimation
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
+from matplotlib.animation import FuncAnimation  # noqa: E402
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401, E402
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection  # noqa: E402
 
-from sim.sim_harness import run_simulation
-
+from sim.sim_harness import run_simulation  # noqa: E402
 
 LOCK_COLORS = {
     "candidate": "#f4a261",
@@ -256,7 +255,7 @@ def _subject_pose(
     upper_arm = 0.30
     lower_arm = 0.28
     upper_leg = 0.46
-    lower_leg = 0.45
+    _lower_leg = 0.45  # noqa: F841  reserved for future leg segment rendering
 
     gait_amp = 0.20 * min(max(speed / 1.15, 0.10), 1.25)
     phase = 2.0 * math.pi * 1.8 * t * min(max(speed / 1.0, 0.3), 1.6)
@@ -519,10 +518,10 @@ def visualize_simulation_3d(
         math.cos(math.radians(subject_heading_deg[0])),
         math.sin(math.radians(subject_heading_deg[0])),
     )
-    init_pose = _subject_pose(subj_x[0], subj_y[0], 0.0, init_heading, subject_speed[0], times[0])
+    _subject_pose(subj_x[0], subj_y[0], 0.0, init_heading, subject_speed[0], times[0])
     init_drone = _drone_geometry((drone_x[0], drone_y[0], drone_z[0]), roll[0], pitch[0], yaw[0])
 
-    home = ax_scene.scatter([0.0], [0.0], [0.05], marker="x", s=85, color="#0b1f2a", label="Home pad")
+    ax_scene.scatter([0.0], [0.0], [0.05], marker="x", s=85, color="#0b1f2a", label="Home pad")
     drone_trail, = ax_scene.plot([], [], [], color="#4f83cc", lw=2.0, alpha=0.85, label="Drone path")
     subj_trail, = ax_scene.plot([], [], [], color="#ff7f5f", lw=1.8, alpha=0.82, label="Subject path")
     drone_shadow, = ax_scene.plot([], [], [], color="#1d3557", lw=2.2, alpha=0.18)
@@ -672,7 +671,7 @@ def visualize_simulation_3d(
         drone_skid_back.set_data_3d(frame["landing_back"][:, 0], frame["landing_back"][:, 1], frame["landing_back"][:, 2])
         drone_nose.set_data_3d(frame["nose_line"][:, 0], frame["nose_line"][:, 1], frame["nose_line"][:, 2])
         drone_camera.set_data_3d(frame["camera_boom"][:, 0], frame["camera_boom"][:, 1], frame["camera_boom"][:, 2])
-        for ring_line, ring in zip(rotor_lines, frame["rotor_rings"]):
+        for ring_line, ring in zip(rotor_lines, frame["rotor_rings"], strict=False):
             ring_line.set_data_3d(ring[:, 0], ring[:, 1], ring[:, 2])
         rotor_hubs._offsets3d = (
             frame["rotor_centers"][:, 0],

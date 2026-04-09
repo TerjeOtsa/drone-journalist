@@ -193,7 +193,7 @@ class SafetyModule:
         # Hard breach: outside keep-in or inside an exclusion zone
         if not result.inside_keep_in:
             return False, SafetyOverride.RETURN_HOME, (
-                f"geofence breach: outside keep-in boundary"
+                "geofence breach: outside keep-in boundary"
             )
         if result.violated_exclusion is not None:
             return False, SafetyOverride.RETURN_HOME, (

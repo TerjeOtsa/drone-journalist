@@ -27,7 +27,6 @@ from interfaces.event_bus import bus
 from interfaces.schemas import (
     AppCommand,
     DroneTelemetry,
-    FlightSetpoint,
     LockState,
     MissionState,
     MissionStatus,
@@ -37,7 +36,6 @@ from interfaces.schemas import (
     StabilityLevel,
     SystemEvent,
     TargetTrack,
-    Vec3,
 )
 
 log = logging.getLogger(__name__)

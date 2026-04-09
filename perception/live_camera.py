@@ -22,7 +22,7 @@ import json
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Optional
 
 import cv2
 import numpy as np
@@ -37,7 +37,6 @@ from perception.schemas import (
     ImageTarget,
     TrackingCues,
 )
-
 
 LOCK_COLORS = {
     LockState.CANDIDATE: (0, 191, 255),

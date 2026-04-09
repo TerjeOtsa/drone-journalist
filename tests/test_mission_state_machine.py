@@ -3,8 +3,6 @@ Unit tests for the Mission State Machine.
 """
 
 import time
-import pytest
-from unittest.mock import patch
 
 from config.parameters import MissionParams
 from flight.mission_state_machine import MissionStateMachine
@@ -15,7 +13,6 @@ from interfaces.schemas import (
     MissionState,
     SafetyOverride,
     SafetyStatus,
-    ShotMode,
     StabilityLevel,
     TargetTrack,
     Vec3,

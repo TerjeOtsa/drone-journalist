@@ -49,58 +49,64 @@ This system sits **between** the perception/identity pipeline and the low-level 
 ## Quick Start
 
 ```bash
-pip install -r requirements.txt
+# Clone and set up
+git clone https://github.com/TerjeOtsa/drone-journalist.git
+cd drone-journalist
+python -m venv .venv
+.venv\Scripts\Activate.ps1          # Windows PowerShell
+# source .venv/bin/activate          # macOS / Linux
+pip install -e ".[dev]"
+
+# Run the test suite (157 tests)
+python -m pytest tests/ -v
+
 # Run the full simulation
 python -m sim.sim_harness
-# Visualize the simulation
-python -m sim.visualize_sim
-# 3D visualize the simulation
-python -m sim.visualize_sim_3d
-# Run the live interactive simulator
+
+# Interactive dashboard with live controls
 python -m sim.interactive_sim
-# Save 3D playback without opening a GUI window
+
+# 3D visualization / GIF export
+python -m sim.visualize_sim_3d
 python -m sim.visualize_sim_3d --gif sim_3d.gif
-# Faster GIF export for longer runs
-python -m sim.visualize_sim_3d --gif sim_3d.gif --duration 20 --frame-step 3 --export-fps 15
+
+# Run regression scenarios
+python -m sim.regression_runner
+
 # Bench-test live tracking with a camera
 python -m perception.live_camera --camera 0
-# Open the operator control panel
+
+# Operator control panel
 python -m product.operator_panel
-# Run unit tests
-python -m pytest tests/ -v
 ```
+
+See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the full developer guide, project layout, and PR checklist.
 
 ## Dev And Hardware Installs
 
 ```bash
-# Dev tooling (pytest + lint/type tooling)
-pip install -r requirements-dev.txt
+# Dev tooling (included in pip install -e ".[dev]")
+pip install -e ".[dev]"
 
 # Optional hardware / SITL transport support
-pip install -r requirements-hardware.txt
+pip install -e ".[hardware]"
 ```
 
-The production-facing MAVLink transport lives in
-`flight/pymavlink_transport.py` and plugs into `FlightInterface` through the
-transport seam added in `flight/flight_interface.py`.
+The MAVLink transport lives in `flight/pymavlink_transport.py` and plugs into
+`FlightInterface` through the transport seam in `flight/flight_interface.py`.
 
-The operator-facing desktop control panel lives in
-`product/operator_panel.py`. It gives you a simple Start / Stop / Re-lock /
-Emergency workflow plus clear shot-mode and follow-distance controls.
+## Documentation
 
-The simulator now also has a live dashboard in `sim/interactive_sim.py` with
-start/stop, forced lock/loss, shot mode, follow distance, target walking, and
-wind controls, along with live force readouts such as thrust, ground effect,
-translational lift, and vortex-ring penalty.
-
-## Related Spec
-
-The external perception and identity contract is defined in
-`VISION_TRACKING_IDENTITY.md`.
+| Document | What it covers |
+|---|---|
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Developer setup, project layout, coding rules, PR checklist |
+| [DESIGN.md](DESIGN.md) | Full technical design — state machines, shot modes, safety, parameters |
+| [VISION_TRACKING_IDENTITY.md](VISION_TRACKING_IDENTITY.md) | Perception & identity lock contract |
+| [VIDEO_APP_INFRASTRUCTURE.md](VIDEO_APP_INFRASTRUCTURE.md) | Video pipeline, phone app, infrastructure target architecture |
 
 ## Live Camera Test
 
-You can now bench-test the perception stack with a USB camera or video file:
+Bench-test the perception stack with a USB camera or video file:
 
 ```bash
 python -m perception.live_camera --camera 0
@@ -108,17 +114,9 @@ python -m perception.live_camera --video sample.mp4
 python -m perception.live_camera --camera 0 --log live_tracks.ndjson
 ```
 
-Controls:
+Keys: `l` = select target, `r` = reset, `q` = quit.
 
-- press `l` to draw/select the journalist ROI
-- press `r` to reset tracking
-- press `q` to quit
-
-Notes:
-
-- this is a perception bench test, not flight control
-- it uses manual enrollment plus optical flow/template tracking, with HOG person detection to help relock
-- the optional world estimate is camera-local only and is not yet suitable for direct flight control
+This is a perception-only test — it does not run flight control.
 
 ## Key Design Principles
 
@@ -127,3 +125,4 @@ Notes:
 3. **Single subject only** — simplifies state machine and safety logic.
 4. **Conservative motion** — jerk-limited, velocity-capped, always smooth.
 5. **Predictable safety** — geofence, battery, and link-loss behave deterministically.
+6. **No magic numbers** — every constant in `config/parameters.py` with a unit comment.

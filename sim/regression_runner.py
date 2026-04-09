@@ -25,7 +25,6 @@ from typing import Any, Dict, List, Optional
 import yaml  # type: ignore[import-untyped]
 
 from config.parameters import SystemConfig
-from interfaces.schemas import ShotMode
 from sim.sim_harness import ScenarioEvent, run_simulation
 
 log = logging.getLogger(__name__)

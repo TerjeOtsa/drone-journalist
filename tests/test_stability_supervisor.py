@@ -2,10 +2,7 @@
 Unit tests for the Stability Supervisor.
 """
 
-import time
-import pytest
 
-from config.parameters import StabilityParams
 from flight.stability_supervisor import StabilitySupervisor
 from interfaces.schemas import DroneTelemetry, StabilityLevel, Vec3
 

@@ -3,21 +3,18 @@ Unit tests for polygon-based geofence geometry and integration with SafetyModule
 """
 
 import math
-import pytest
 
+from config.parameters import SafetyParams
 from flight.geofence import (
     GeofenceChecker,
     GeofenceConfig,
-    GeofenceResult,
     GeofenceZone,
     circle_polygon,
     distance_to_polygon_edge,
     point_in_polygon,
 )
-from config.parameters import SafetyParams
 from flight.safety_module import SafetyModule
 from interfaces.schemas import DroneTelemetry, FlightSetpoint, SafetyOverride, Vec3
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 #  Helpers

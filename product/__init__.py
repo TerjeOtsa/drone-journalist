@@ -8,12 +8,6 @@ from product.adapters import (
     ProductCommandAdapter,
     ProductStateAdapter,
 )
-from product.operator_panel import (
-    DISTANCE_PRESETS,
-    OperatorControlPanel,
-    OperatorPanelController,
-    OperatorPanelViewState,
-)
 from product.config_profiles import (
     ProductProfile,
     ProductRuntimeConfig,
@@ -23,6 +17,12 @@ from product.config_profiles import (
     get_profile,
     list_profiles,
     recording_policy,
+)
+from product.operator_panel import (
+    DISTANCE_PRESETS,
+    OperatorControlPanel,
+    OperatorPanelController,
+    OperatorPanelViewState,
 )
 from product.schemas import (
     ConfidenceSnapshot,

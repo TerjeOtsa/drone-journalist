@@ -14,7 +14,6 @@ operator and environment controls:
 from __future__ import annotations
 
 import argparse
-import math
 
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -22,7 +21,6 @@ from matplotlib.widgets import Button, RadioButtons, Slider
 
 from interfaces.schemas import ShotMode
 from sim.sim_harness import SimulationSession
-
 
 LOCK_COLORS = {
     "candidate": "#f4a261",

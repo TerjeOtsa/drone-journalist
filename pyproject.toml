@@ -1,3 +1,35 @@
+[project]
+name = "drone-journalist"
+version = "0.1.0"
+description = "Autonomy & flight systems for an autonomous follow-and-film drone"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+    "numpy>=1.24",
+    "matplotlib>=3.7",
+    "opencv-python>=4.10",
+    "dataclasses-json>=0.6",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.8",
+    "mypy>=1.11",
+]
+hardware = [
+    "pymavlink>=2.4",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["config*", "flight*", "interfaces*", "perception*", "product*", "sim*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]

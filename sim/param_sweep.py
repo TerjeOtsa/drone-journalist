@@ -17,15 +17,13 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import copy
 import csv
 import io
 import logging
-import sys
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional
 
-from config.parameters import SimulationParams, SystemConfig
+from config.parameters import SystemConfig
 from sim.regression_runner import extract_metrics
 from sim.sim_harness import ScenarioEvent, run_simulation
 

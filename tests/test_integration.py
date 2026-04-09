@@ -2,9 +2,7 @@
 Integration test: run the full simulation and verify key properties.
 """
 
-import pytest
-from sim.sim_harness import run_simulation, DEFAULT_SCENARIO, ScenarioEvent
-from config.parameters import SystemConfig
+from sim.sim_harness import ScenarioEvent, run_simulation
 
 
 class TestFullSimulation:
@@ -99,6 +97,6 @@ class TestFullSimulation:
         # At least some positions should differ
         diffs = [
             abs(ra["drone_x"] - rb["drone_x"]) + abs(ra["drone_y"] - rb["drone_y"])
-            for ra, rb in zip(a[-50:], b[-50:])
+            for ra, rb in zip(a[-50:], b[-50:], strict=False)
         ]
         assert max(diffs) > 0.01, "Different seeds should produce different trajectories"
