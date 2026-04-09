@@ -24,12 +24,8 @@ from typing import Deque, Optional
 from config.parameters import StabilityParams
 from interfaces.clock import Clock, SystemClock
 from interfaces.event_bus import bus
-from interfaces.schemas import (
-    DroneTelemetry,
-    StabilityLevel,
-    SystemEvent,
-    Vec3,
-)
+from interfaces.schemas import (DroneTelemetry, StabilityLevel, SystemEvent,
+                                Vec3)
 
 log = logging.getLogger(__name__)
 

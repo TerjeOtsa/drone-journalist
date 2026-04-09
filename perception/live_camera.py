@@ -28,15 +28,12 @@ import cv2
 import numpy as np
 
 from interfaces.schemas import LockState
-from perception.geometry import MonocularGroundProjector, MonocularProjectorParams
+from perception.geometry import (MonocularGroundProjector,
+                                 MonocularProjectorParams)
 from perception.identity_lock import IdentityLockManager
 from perception.parameters import IdentityLockParams
-from perception.schemas import (
-    CandidateObservation,
-    IdentityCues,
-    ImageTarget,
-    TrackingCues,
-)
+from perception.schemas import (CandidateObservation, IdentityCues,
+                                ImageTarget, TrackingCues)
 
 LOCK_COLORS = {
     LockState.CANDIDATE: (0, 191, 255),
