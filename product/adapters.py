@@ -8,24 +8,12 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
 
-from interfaces.schemas import (
-    AppCommand,
-    DroneTelemetry,
-    MissionStatus,
-    SafetyOverride,
-    ShotMode,
-    SystemEvent,
-    TargetTrack,
-)
-from product.schemas import (
-    ConfidenceSnapshot,
-    LinkStats,
-    LockStatusView,
-    MissionView,
-    ProductEvent,
-    ProductSnapshot,
-    RecordingState,
-)
+from interfaces.schemas import (AppCommand, DroneTelemetry, MissionStatus,
+                                SafetyOverride, ShotMode, SystemEvent,
+                                TargetTrack)
+from product.schemas import (ConfidenceSnapshot, LinkStats, LockStatusView,
+                             MissionView, ProductEvent, ProductSnapshot,
+                             RecordingState)
 
 
 @dataclass(frozen=True)

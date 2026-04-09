@@ -30,17 +30,9 @@ from flight.safety_module import SafetyModule
 from flight.shot_controller import ShotController
 from flight.stability_supervisor import StabilitySupervisor
 from interfaces.clock import SimClock
-from interfaces.schemas import (
-    AppCommand,
-    DroneTelemetry,
-    FlightSetpoint,
-    GeoPoint,
-    LockState,
-    SafetyStatus,
-    ShotMode,
-    TargetTrack,
-    Vec3,
-)
+from interfaces.schemas import (AppCommand, DroneTelemetry, FlightSetpoint,
+                                GeoPoint, LockState, SafetyStatus, ShotMode,
+                                TargetTrack, Vec3)
 
 logging.basicConfig(
     level=logging.INFO,

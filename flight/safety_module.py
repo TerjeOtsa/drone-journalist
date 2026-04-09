@@ -25,14 +25,8 @@ from config.parameters import SafetyParams
 from flight.geofence import GeofenceChecker, GeofenceConfig
 from interfaces.clock import Clock, SystemClock
 from interfaces.event_bus import bus
-from interfaces.schemas import (
-    DroneTelemetry,
-    FlightSetpoint,
-    SafetyOverride,
-    SafetyStatus,
-    SystemEvent,
-    Vec3,
-)
+from interfaces.schemas import (DroneTelemetry, FlightSetpoint, SafetyOverride,
+                                SafetyStatus, SystemEvent, Vec3)
 
 log = logging.getLogger(__name__)
 

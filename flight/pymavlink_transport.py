@@ -11,7 +11,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Optional
 
-from flight.flight_interface import AutopilotSetpointCommand, AutopilotTransport
+from flight.flight_interface import (AutopilotSetpointCommand,
+                                     AutopilotTransport)
 
 
 @dataclass(frozen=True)
@@ -151,4 +152,5 @@ class PymavlinkTransport(AutopilotTransport):
         }
         if coordinate_frame not in frame_map:
             raise ValueError(f"Unsupported coordinate frame: {coordinate_frame}")
+        return frame_map[coordinate_frame]
         return frame_map[coordinate_frame]
