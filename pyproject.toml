@@ -51,6 +51,8 @@ ignore = ["E501"]
 python_version = "3.12"
 pretty = true
 ignore_missing_imports = true
-exclude = [
-  "perception/live_camera.py",
-]
+exclude = "(^|[\\\\/])perception[\\\\/]live_camera\\.py$"
+
+[[tool.mypy.overrides]]
+module = ["perception.live_camera"]
+ignore_errors = true

@@ -1,0 +1,7 @@
+{
+    "reportMissingImports": "warning",
+    "reportMissingModuleSource": "none",
+    "pythonVersion": "3.12",
+    "include": ["config", "flight", "interfaces", "perception", "product", "sim", "tests"],
+    "exclude": ["**/__pycache__"]
+}

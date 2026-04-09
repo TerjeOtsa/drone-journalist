@@ -10,9 +10,9 @@ from flight.pymavlink_transport import PymavlinkTransport
 
 class _FakeMav:
     def __init__(self) -> None:
-        self.position_calls = []
-        self.command_calls = []
-        self.mode_calls = []
+        self.position_calls: list[tuple[object, ...]] = []
+        self.command_calls: list[tuple[object, ...]] = []
+        self.mode_calls: list[tuple[object, ...]] = []
 
     def set_position_target_local_ned_send(self, *args):
         self.position_calls.append(args)

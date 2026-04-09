@@ -15,6 +15,7 @@ import argparse
 import math
 import sys
 from pathlib import Path
+from typing import TypeAlias, TypedDict
 
 
 def _arg_value(name: str) -> str | None:
@@ -38,6 +39,7 @@ elif "--snapshot" in sys.argv or "--gif" in sys.argv:
 
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
+import numpy.typing as npt  # noqa: E402
 from matplotlib.animation import FuncAnimation  # noqa: E402
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401, E402
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection  # noqa: E402
@@ -50,6 +52,23 @@ LOCK_COLORS = {
     "weak": "#e9c46a",
     "lost": "#e76f51",
 }
+
+Point3: TypeAlias = tuple[float, float, float]
+PointArray: TypeAlias = npt.NDArray[np.float64]
+
+
+class DroneGeometry(TypedDict):
+    body_faces: list[PointArray]
+    arm_a: tuple[Point3, Point3]
+    arm_b: tuple[Point3, Point3]
+    landing_left: PointArray
+    landing_right: PointArray
+    landing_front: PointArray
+    landing_back: PointArray
+    nose_line: PointArray
+    camera_boom: PointArray
+    rotor_rings: list[PointArray]
+    rotor_centers: PointArray
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -187,7 +206,7 @@ def _transformed_faces(
     size: tuple[float, float, float],
     origin: tuple[float, float, float],
     rotation: np.ndarray,
-) -> list[np.ndarray]:
+) -> list[PointArray]:
     return [_transform_points(face, origin, rotation) for face in _cuboid_faces(size)]
 
 
@@ -197,7 +216,7 @@ def _circle_points(
     *,
     count: int = 40,
     z: float | None = None,
-) -> np.ndarray:
+) -> PointArray:
     angles = np.linspace(0.0, 2.0 * math.pi, count)
     z_value = center[2] if z is None else z
     return np.column_stack(
@@ -216,7 +235,7 @@ def _disc_points(
     origin: tuple[float, float, float],
     *,
     count: int = 28,
-) -> np.ndarray:
+) -> PointArray:
     angles = np.linspace(0.0, 2.0 * math.pi, count)
     local = np.column_stack(
         [
@@ -235,7 +254,7 @@ def _subject_pose(
     heading_xy: tuple[float, float],
     speed: float,
     t: float,
-) -> dict[str, tuple[float, float, float]]:
+) -> dict[str, Point3]:
     fx, fy = heading_xy
     sx, sy = -fy, fx
 
@@ -346,8 +365,12 @@ def _update_line3d(line, p0: tuple[float, float, float], p1: tuple[float, float,
     line.set_data_3d([p0[0], p1[0]], [p0[1], p1[1]], [p0[2], p1[2]])
 
 
-def _set_poly_verts(poly: Poly3DCollection, faces: list[np.ndarray]) -> None:
+def _set_poly_verts(poly: Poly3DCollection, faces: list[PointArray]) -> None:
     poly.set_verts([face.tolist() for face in faces])
+
+
+def _point3(values: PointArray) -> Point3:
+    return (float(values[0]), float(values[1]), float(values[2]))
 
 
 def _drone_geometry(
@@ -355,7 +378,7 @@ def _drone_geometry(
     roll_deg: float,
     pitch_deg: float,
     yaw_deg: float,
-) -> dict[str, object]:
+) -> DroneGeometry:
     rotation = _rotation_matrix(roll_deg, pitch_deg, yaw_deg)
     visual_scale = 1.22
     arm = 0.34 * visual_scale
@@ -370,8 +393,8 @@ def _drone_geometry(
     )
     rotor_centers = _transform_points(rotor_centers_local, drone_pos, rotation)
 
-    arm_a = (tuple(rotor_centers[0]), tuple(rotor_centers[3]))
-    arm_b = (tuple(rotor_centers[1]), tuple(rotor_centers[2]))
+    arm_a = (_point3(rotor_centers[0]), _point3(rotor_centers[3]))
+    arm_b = (_point3(rotor_centers[1]), _point3(rotor_centers[2]))
 
     landing_left = _transform_points(
         visual_scale * np.array([[-0.08, 0.16, -0.11], [0.12, 0.16, -0.11]], dtype=float),
@@ -728,7 +751,7 @@ def visualize_simulation_3d(
     if snapshot is not None:
         draw_frame(len(records) - 1)
         snapshot.parent.mkdir(parents=True, exist_ok=True)
-        fig.savefig(snapshot, dpi=150, bbox_inches="tight")
+        fig.savefig(str(snapshot), dpi=150, bbox_inches="tight")
         plt.close(fig)
         print(f"Saved 3D snapshot to {snapshot}")
         return
@@ -747,7 +770,7 @@ def visualize_simulation_3d(
 
     interval_ms = max(1, int(1000 * dt * frame_step))
     anim = FuncAnimation(fig, draw_frame, frames=frame_indices, interval=interval_ms, repeat=False)
-    fig._anim = anim
+    fig._anim = anim  # type: ignore[attr-defined]  # prevent GC of animation
 
     if gif is not None:
         from matplotlib.animation import PillowWriter
@@ -766,9 +789,9 @@ def visualize_simulation_3d(
 
         print(f"Saving GIF with {total} rendered frames at {fps:.1f} FPS...", flush=True)
         try:
-            anim.save(gif, writer=PillowWriter(fps=fps), progress_callback=_progress)
+            anim.save(str(gif), writer=PillowWriter(fps=fps), progress_callback=_progress)  # type: ignore[arg-type]
         except TypeError:
-            anim.save(gif, writer=PillowWriter(fps=fps))
+            anim.save(str(gif), writer=PillowWriter(fps=fps))  # type: ignore[arg-type]
         plt.close(fig)
         print(f"Saved 3D animation to {gif}", flush=True)
         return

@@ -7,9 +7,10 @@ the interaction model remains testable in headless environments.
 
 from __future__ import annotations
 
+import functools
 import time
 from dataclasses import dataclass
-from typing import Callable, Optional
+from typing import Any, Callable, Optional, cast
 
 from config.parameters import ShotParams
 from interfaces.schemas import AppCommand, MissionState, ShotMode
@@ -20,8 +21,8 @@ try:
     import tkinter as tk
     from tkinter import ttk
 except ImportError:  # pragma: no cover - depends on local Python installation
-    tk = None
-    ttk = None
+    tk = cast(Any, None)
+    ttk = cast(Any, None)
 
 
 DISTANCE_PRESETS: tuple[tuple[str, float], ...] = (
@@ -290,7 +291,7 @@ class OperatorControlPanel:
             ttk.Button(
                 distance,
                 text=f"{label} {meters:.0f} m",
-                command=lambda value=meters: self._apply_distance_preset(value),
+                command=functools.partial(self._apply_distance_preset, meters),
             ).grid(row=2, column=idx, sticky="ew", padx=4, pady=(10, 0))
 
         ttk.Label(

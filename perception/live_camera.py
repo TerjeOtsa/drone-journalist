@@ -239,13 +239,13 @@ class LiveCameraTracker:
         )
         self.projector = MonocularGroundProjector(self.p.projector)
         self.hog = cv2.HOGDescriptor()
-        self.hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
+        self.hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())  # type: ignore[attr-defined]
         # Face detection cascades (ship with every OpenCV install)
         self._face_cascade_frontal = cv2.CascadeClassifier(
-            cv2.data.haarcascades + "haarcascade_frontalface_alt2.xml"
+            cv2.data.haarcascades + "haarcascade_frontalface_alt2.xml"  # type: ignore[attr-defined]
         )
         self._face_cascade_profile = cv2.CascadeClassifier(
-            cv2.data.haarcascades + "haarcascade_profileface.xml"
+            cv2.data.haarcascades + "haarcascade_profileface.xml"  # type: ignore[attr-defined]
         )
         self.reset()
 
@@ -499,7 +499,7 @@ class LiveCameraTracker:
             self.prev_gray,
             gray,
             self.prev_points,
-            None,
+            None,  # type: ignore[arg-type]  # cv2 stubs lack None-accepting overload
             winSize=(self.p.flow_win_size, self.p.flow_win_size),
             maxLevel=3,
         )
@@ -580,7 +580,9 @@ class LiveCameraTracker:
         pred_cx, pred_cy = _bbox_center(predicted_bbox)
         pred_diag = max((_bbox_area(predicted_bbox) ** 0.5), 1.0)
         for rect in rects:
-            bbox = tuple(float(v) for v in rect)
+            bbox: tuple[float, float, float, float] = (
+                float(rect[0]), float(rect[1]), float(rect[2]), float(rect[3]),
+            )
             patch = _extract_patch(frame, bbox)
             if patch is None or self.template_hist is None:
                 continue
@@ -637,10 +639,12 @@ class LiveCameraTracker:
         resized_prev = _safe_resize_gray(self.template_gray, (gray.shape[1], gray.shape[0]))
         blended = cv2.addWeighted(resized_prev, 1.0 - alpha, gray, alpha, 0.0)
         self.template_gray = blended
-        self.template_hist = (1.0 - alpha) * self.template_hist + alpha * hist
-        total = float(np.sum(self.template_hist))
+        assert self.template_hist is not None  # guarded by early return above
+        blended_hist = (1.0 - alpha) * self.template_hist + alpha * hist
+        total = float(np.sum(blended_hist))
         if total > 1e-6:
-            self.template_hist /= total
+            blended_hist = blended_hist / total
+        self.template_hist = blended_hist
 
     def _sanitize_bbox(
         self,
@@ -867,7 +871,9 @@ def main() -> None:
             if key == ord("l"):
                 roi = cv2.selectROI("Live Camera Tracker", frame, fromCenter=False, showCrosshair=True)
                 if roi and roi[2] > 0 and roi[3] > 0:
-                    tracker.initialize_target(frame, tuple(int(v) for v in roi))
+                    tracker.initialize_target(
+                        frame, (int(roi[0]), int(roi[1]), int(roi[2]), int(roi[3])),
+                    )
 
     finally:
         if log_handle is not None:

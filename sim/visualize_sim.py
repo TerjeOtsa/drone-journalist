@@ -99,7 +99,7 @@ def visualize_simulation(
     ax_map.grid(True, alpha=0.25)
     _set_equal_bounds(ax_map, drone_x + subj_x + [0.0], drone_y + subj_y + [0.0])
 
-    ax_map.scatter([0.0], [0.0], marker="x", s=80, color="black", label="Home")
+    ax_map.scatter([0.0], [0.0], marker="x", s=80, color="black", label="Home")  # type: ignore[arg-type]
     drone_dot = ax_map.scatter([], [], s=90, color="#1d3557", label="Drone")
     subject_dot = ax_map.scatter([], [], s=90, color="#d62828", label="Subject")
     drone_path, = ax_map.plot([], [], color="#457b9d", lw=1.5, alpha=0.7)
@@ -192,14 +192,14 @@ def visualize_simulation(
         draw_frame(len(records) - 1)
         snapshot.parent.mkdir(parents=True, exist_ok=True)
         fig.tight_layout()
-        fig.savefig(snapshot, dpi=140)
+        fig.savefig(str(snapshot), dpi=140)
         plt.close(fig)
         print(f"Saved snapshot to {snapshot}")
         return
 
     interval_ms = max(1, int(1000 * dt))
     anim = FuncAnimation(fig, draw_frame, frames=len(records), interval=interval_ms, repeat=False)
-    fig._anim = anim  # keep a live reference for interactive backends
+    fig._anim = anim  # type: ignore[attr-defined]  # prevent GC of animation
     fig.tight_layout()
     plt.show()
 

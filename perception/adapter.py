@@ -12,14 +12,19 @@ def result_to_target_track(result: LockResult) -> TargetTrack:
     """Map a rich perception result onto the shared autonomy boundary."""
     image = result.target_position_image
     world = result.target_position_world
-    world_is_ned = world is not None and world.frame == "local_ned"
+    target_position_world = None
+    target_velocity_world = None
+    if world is not None and world.frame == "local_ned":
+        target_position_world = world.position_m
+        target_velocity_world = world.velocity_mps
+
     return TargetTrack(
         timestamp=result.timestamp_ms / 1000.0,
         target_position_image=(
             (image.cx_norm, image.cy_norm) if image is not None else (0.0, 0.0)
         ),
-        target_position_world=world.position_m if world_is_ned else None,
-        target_velocity_world=world.velocity_mps if world_is_ned else None,
+        target_position_world=target_position_world,
+        target_velocity_world=target_velocity_world,
         identity_confidence=result.identity_confidence,
         tracking_confidence=result.tracking_confidence,
         lock_state=result.lock_state,

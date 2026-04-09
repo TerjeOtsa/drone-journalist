@@ -1,5 +1,5 @@
 {
-    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+    "python.defaultInterpreterPath": "python",
     "python.testing.pytestEnabled": true,
     "python.testing.pytestArgs": [
         "tests",
@@ -7,6 +7,9 @@
     ],
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.autoImportCompletions": true,
+    "python.analysis.extraPaths": [
+        "C:\\Users\\terje\\AppData\\Local\\Packages\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\LocalCache\\local-packages\\Python312\\site-packages"
+    ],
 
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff",
