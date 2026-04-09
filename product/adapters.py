@@ -51,6 +51,7 @@ class ProductStateAdapter:
         self.profile = profile
 
     def make_lock_view(self, track: TargetTrack) -> LockStatusView:
+        """Build a product-facing lock status view from a perception track."""
         return LockStatusView(
             timestamp=track.timestamp,
             lock_state=track.lock_state,
@@ -63,6 +64,7 @@ class ProductStateAdapter:
         )
 
     def make_mission_view(self, status: MissionStatus) -> MissionView:
+        """Build a product-facing mission view from a mission status."""
         safety_override = (
             status.safety.active_override
             if status.safety is not None
@@ -91,6 +93,7 @@ class ProductStateAdapter:
         storage_minutes_remaining: Optional[int] = None,
         link: Optional[LinkStats] = None,
     ) -> ProductSnapshot:
+        """Assemble a full product snapshot for cold-start / reconnect."""
         return ProductSnapshot(
             timestamp=mission_status.timestamp,
             drone_id=self.drone_id,
@@ -114,6 +117,7 @@ class ProductCommandAdapter:
         timestamp: float,
         requested_shot_mode: ShotMode | None = None,
     ) -> LaunchTranslation:
+        """Build a launch plan with optional deferred shot-mode switch."""
         immediate = (AppCommand(timestamp=timestamp, action="start"),)
         deferred: tuple[AppCommand, ...] = ()
         if requested_shot_mode is not None:
@@ -139,6 +143,7 @@ class ProductCommandAdapter:
         return list(self.launch_plan(timestamp, requested_shot_mode).immediate)
 
     def set_mode(self, timestamp: float, shot_mode: ShotMode) -> AppCommand:
+        """Create a ``set_shot_mode`` command."""
         return AppCommand(
             timestamp=timestamp,
             action="set_shot_mode",
@@ -146,6 +151,7 @@ class ProductCommandAdapter:
         )
 
     def set_distance(self, timestamp: float, desired_distance: float) -> AppCommand:
+        """Create a ``set_distance`` command."""
         return AppCommand(
             timestamp=timestamp,
             action="set_distance",
@@ -153,12 +159,15 @@ class ProductCommandAdapter:
         )
 
     def relock(self, timestamp: float) -> AppCommand:
+        """Create a ``relock`` command."""
         return AppCommand(timestamp=timestamp, action="relock")
 
     def stop(self, timestamp: float) -> AppCommand:
+        """Create a ``stop`` command."""
         return AppCommand(timestamp=timestamp, action="stop")
 
     def emergency_stop(self, timestamp: float) -> AppCommand:
+        """Create an ``emergency_stop`` command."""
         return AppCommand(timestamp=timestamp, action="emergency_stop")
 
 
@@ -176,6 +185,7 @@ class EventMirror:
         monotonic_time: float | None = None,
         correlation_id: str | None = None,
     ) -> ProductEvent:
+        """Wrap a low-level ``SystemEvent`` as a sequenced ``ProductEvent``."""
         self._next_seq += 1
         return ProductEvent(
             seq=self._next_seq,

@@ -112,6 +112,7 @@ class SessionLog:
                 )
 
     def record_event(self, event: ProductEvent) -> None:
+        """Persist a product event to SQLite and the JSONL sidecar."""
         payload_json = json.dumps(event.payload, sort_keys=True)
         event_json = json.dumps(event.to_dict(), sort_keys=True)
         with self._conn:
@@ -134,6 +135,7 @@ class SessionLog:
             self._append_jsonl_line(self.events_path, event_json)
 
     def record_snapshot(self, snapshot: ProductSnapshot) -> None:
+        """Persist a product snapshot to the snapshots table."""
         payload = snapshot.to_dict()
         with self._conn:
             self._conn.execute(
@@ -161,6 +163,7 @@ class SessionLog:
             handle.write(payload_json + "\n")
 
     def iter_events(self) -> Iterator[ProductEvent]:
+        """Yield all stored events in sequence order."""
         cursor = self._conn.execute(
             """
             SELECT seq, timestamp, monotonic_time, source, event, correlation_id, payload_json
@@ -181,6 +184,7 @@ class SessionLog:
             )
 
     def iter_snapshots(self) -> Iterator[dict[str, Any]]:
+        """Yield all stored snapshots as deserialized dicts."""
         cursor = self._conn.execute(
             """
             SELECT id, timestamp, payload_json
@@ -194,6 +198,7 @@ class SessionLog:
             yield payload
 
     def timeline(self) -> list[dict[str, Any]]:
+        """Return a merged, time-sorted list of events and snapshots."""
         entries: list[dict[str, Any]] = []
 
         for event in self.iter_events():
@@ -212,6 +217,7 @@ class SessionLog:
         return entries
 
     def close(self) -> None:
+        """Close the SQLite connection."""
         self._conn.close()
 
     def __enter__(self) -> "SessionLog":

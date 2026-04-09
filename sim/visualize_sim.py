@@ -69,6 +69,7 @@ def visualize_simulation(
     snapshot: Path | None = None,
     tail: int = 200,
 ) -> None:
+    """Run the simulator and display a top-down animated playback."""
     records = run_simulation(duration=duration, dt=dt, seed=seed)
     if not records:
         raise RuntimeError("Simulation produced no records")
@@ -205,6 +206,7 @@ def visualize_simulation(
 
 
 def main() -> None:
+    """CLI entry point for ``python -m sim.visualize_sim``."""
     args = _build_parser().parse_args()
     visualize_simulation(
         duration=args.duration,

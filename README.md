@@ -34,17 +34,58 @@ This system sits **between** the perception/identity pipeline and the low-level 
 
 ## Module Inventory
 
-| Module                  | File                              | Rate   | Runs On          |
-|-------------------------|-----------------------------------|--------|------------------|
-| Flight Interface        | `flight/flight_interface.py`      | 50 Hz  | Companion        |
-| Shot Controller         | `flight/shot_controller.py`       | 25 Hz  | Companion        |
-| Stability Supervisor    | `flight/stability_supervisor.py`  | 25 Hz  | Companion        |
-| Mission State Machine   | `flight/mission_state_machine.py` | 25 Hz  | Companion        |
-| Safety & Geofence       | `flight/safety_module.py`         | 50 Hz  | Companion        |
-| Configuration           | `config/parameters.py`            | —      | Companion        |
-| Interfaces / Schemas    | `interfaces/schemas.py`           | —      | Shared           |
-| Event Bus               | `interfaces/event_bus.py`         | —      | Companion        |
-| Simulation Harness      | `sim/sim_harness.py`              | 50 Hz  | Dev workstation  |
+### Flight (`flight/`)
+
+| Module                | File                              | Rate   | Runs On   |
+|-----------------------|-----------------------------------|--------|-----------|
+| Flight Interface      | `flight/flight_interface.py`      | 50 Hz  | Companion |
+| Shot Controller       | `flight/shot_controller.py`       | 25 Hz  | Companion |
+| Stability Supervisor  | `flight/stability_supervisor.py`  | 25 Hz  | Companion |
+| Mission State Machine | `flight/mission_state_machine.py` | 25 Hz  | Companion |
+| Safety Module         | `flight/safety_module.py`         | 50 Hz  | Companion |
+| Geofence              | `flight/geofence.py`              | 50 Hz  | Companion |
+| MAVLink Transport     | `flight/pymavlink_transport.py`   | 50 Hz  | Companion |
+
+### Perception (`perception/`)
+
+| Module              | File                          | Rate   | Runs On   |
+|---------------------|-------------------------------|--------|-----------|
+| Perception Adapter  | `perception/adapter.py`       | 25 Hz  | Companion |
+| Geometry            | `perception/geometry.py`      | —      | Companion |
+| Identity Lock       | `perception/identity_lock.py` | 25 Hz  | Companion |
+| Live Camera Tracker | `perception/live_camera.py`   | 30 fps | Companion |
+| Perception Params   | `perception/parameters.py`    | —      | Companion |
+| Perception Schemas  | `perception/schemas.py`       | —      | Shared    |
+
+### Product (`product/`)
+
+| Module          | File                          | Rate | Runs On        |
+|-----------------|-------------------------------|------|----------------|
+| Product Adapters| `product/adapters.py`         | —    | Companion      |
+| Config Profiles | `product/config_profiles.py`  | —    | Companion      |
+| Operator Panel  | `product/operator_panel.py`   | —    | Dev workstation |
+| Session Log     | `product/session_log.py`      | —    | Companion      |
+| Product Schemas | `product/schemas.py`          | —    | Shared         |
+
+### Shared (`interfaces/`, `config/`)
+
+| Module        | File                    | Rate | Runs On   |
+|---------------|-------------------------|------|-----------|
+| Event Bus     | `interfaces/event_bus.py`| —   | Companion |
+| Clock         | `interfaces/clock.py`   | —    | Companion |
+| Schemas       | `interfaces/schemas.py` | —    | Shared    |
+| Configuration | `config/parameters.py`  | —    | Companion |
+
+### Simulation (`sim/`)
+
+| Module            | File                        | Rate   | Runs On         |
+|-------------------|-----------------------------|--------|-----------------|
+| Simulation Harness| `sim/sim_harness.py`        | 50 Hz  | Dev workstation |
+| Interactive Sim   | `sim/interactive_sim.py`    | 50 Hz  | Dev workstation |
+| Regression Runner | `sim/regression_runner.py`  | 50 Hz  | Dev workstation |
+| Param Sweep       | `sim/param_sweep.py`        | 50 Hz  | Dev workstation |
+| 3D Visualizer     | `sim/visualize_sim_3d.py`   | —      | Dev workstation |
+| 2D Visualizer     | `sim/visualize_sim.py`      | —      | Dev workstation |
 
 ## Quick Start
 
@@ -66,12 +107,16 @@ python -m sim.sim_harness
 # Interactive dashboard with live controls
 python -m sim.interactive_sim
 
-# 3D visualization / GIF export
+# 2D / 3D visualization and GIF export
+python -m sim.visualize_sim
 python -m sim.visualize_sim_3d
 python -m sim.visualize_sim_3d --gif sim_3d.gif
 
 # Run regression scenarios
 python -m sim.regression_runner
+
+# Grid-search parameter tuning
+python -m sim.param_sweep
 
 # Bench-test live tracking with a camera
 python -m perception.live_camera --camera 0

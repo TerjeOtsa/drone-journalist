@@ -462,6 +462,7 @@ def visualize_simulation_3d(
     frame_step: int = 1,
     export_fps: float | None = None,
 ) -> None:
+    """Run the simulator and display a 3D animated playback with drone geometry."""
     records = run_simulation(duration=duration, dt=dt, seed=seed)
     if not records:
         raise RuntimeError("Simulation produced no records")
@@ -808,6 +809,7 @@ def visualize_simulation_3d(
 
 
 def main() -> None:
+    """CLI entry point for ``python -m sim.visualize_sim_3d``."""
     args = _build_parser().parse_args()
     visualize_simulation_3d(
         duration=args.duration,

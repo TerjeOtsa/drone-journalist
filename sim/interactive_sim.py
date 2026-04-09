@@ -14,6 +14,7 @@ operator and environment controls:
 from __future__ import annotations
 
 import argparse
+from typing import Any, cast
 
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -28,6 +29,11 @@ LOCK_COLORS = {
     "weak": "#e9c46a",
     "lost": "#e76f51",
 }
+
+
+def _set_button_text(button: Button, text: str) -> None:
+    """Set button label text (works around incomplete matplotlib type stubs)."""
+    cast(Any, button).label.set_text(text)
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -62,6 +68,8 @@ def _set_equal_bounds(ax, xs, ys, pad: float = 3.0) -> None:
 
 
 class InteractiveSimulationApp:
+    """Matplotlib-based interactive dashboard for the autonomy simulator."""
+
     def __init__(self, *, dt: float, seed: int | None, steps_per_frame: int, tail: int) -> None:
         self.dt = dt
         self.seed = seed
@@ -114,7 +122,9 @@ class InteractiveSimulationApp:
         self.subject_dot = self.ax_map.scatter([], [], s=90, color="#d62828", label="Subject")
         self.drone_path, = self.ax_map.plot([], [], color="#457b9d", lw=1.6, alpha=0.8)
         self.subject_path, = self.ax_map.plot([], [], color="#e76f51", lw=1.6, alpha=0.8)
-        self.home_marker = self.ax_map.scatter([0.0], [0.0], marker="x", s=70, color="black", label="Home")
+        self.home_marker = self.ax_map.scatter(
+            [0.0], [0.0], marker=cast(Any, "x"), s=70, color="black", label="Home",
+        )
         self.line_of_sight, = self.ax_map.plot([], [], color=LOCK_COLORS["lost"], lw=1.6, alpha=0.9)
         self.map_text = self.ax_map.text(
             0.02,
@@ -206,7 +216,7 @@ class InteractiveSimulationApp:
 
         self.shot_radio = RadioButtons(
             self.fig.add_axes([0.735, 0.12, 0.205, 0.14]),
-            ("Stand-up", "Walk & Talk", "Wide Safety", "Orbit"),
+            cast(Any, ("Stand-up", "Walk & Talk", "Wide Safety", "Orbit")),
             active=1,
         )
         self.panel_text = self.fig.text(
@@ -235,19 +245,19 @@ class InteractiveSimulationApp:
 
     def _toggle_pause(self, _event) -> None:
         self.running = not self.running
-        self.pause_button.label.set_text("Resume" if not self.running else "Pause")
+        _set_button_text(self.pause_button, "Resume" if not self.running else "Pause")
 
     def _toggle_walking(self, _event) -> None:
         self.walking_enabled = not self.walking_enabled
-        self.walk_button.label.set_text(f"Walking: {'On' if self.walking_enabled else 'Off'}")
+        _set_button_text(self.walk_button, f"Walking: {'On' if self.walking_enabled else 'Off'}")
         self._apply_motion()
 
     def _reset_session(self, _event) -> None:
         self._build_session()
         self.walking_enabled = False
-        self.walk_button.label.set_text("Walking: Off")
+        _set_button_text(self.walk_button, "Walking: Off")
         self.running = True
-        self.pause_button.label.set_text("Pause")
+        _set_button_text(self.pause_button, "Pause")
         self._apply_controls()
         self.session.step()
         self._draw_latest()
@@ -365,9 +375,11 @@ class InteractiveSimulationApp:
         self._draw_latest()
 
     def run(self) -> None:
+        """Start the Matplotlib animation loop."""
         anim = FuncAnimation(self.fig, self._update_frame, interval=max(20, int(self.dt * 1000 * self.steps_per_frame)))
-        self.fig._anim = anim
-        self.fig.tight_layout(rect=[0.0, 0.0, 0.98, 0.97])
+        # Keep a reference so the animation is not garbage-collected.
+        cast(Any, self.fig)._anim = anim
+        self.fig.tight_layout(rect=(0.0, 0.0, 0.98, 0.97))
         plt.show()
 
 
@@ -378,6 +390,7 @@ def launch_interactive_simulation(
     steps_per_frame: int = 2,
     tail: int = 300,
 ) -> None:
+    """Create and run an interactive simulation app with the given parameters."""
     app = InteractiveSimulationApp(
         dt=dt,
         seed=seed,
@@ -388,6 +401,7 @@ def launch_interactive_simulation(
 
 
 def main() -> None:
+    """CLI entry point for ``python -m sim.interactive_sim``."""
     args = _build_parser().parse_args()
     launch_interactive_simulation(
         dt=args.dt,

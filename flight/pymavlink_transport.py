@@ -16,6 +16,8 @@ from flight.flight_interface import AutopilotSetpointCommand, AutopilotTransport
 
 @dataclass(frozen=True)
 class PymavlinkConnectionConfig:
+    """Connection parameters for a pymavlink MAVLink endpoint."""
+
     endpoint: str
     baud: int = 57600
     source_system: int = 255
@@ -47,6 +49,7 @@ class PymavlinkTransport(AutopilotTransport):
 
     @classmethod
     def connect(cls, config: PymavlinkConnectionConfig) -> "PymavlinkTransport":
+        """Open a MAVLink connection described by *config* and return a transport."""
         try:
             from pymavlink import mavutil
         except ImportError as exc:
@@ -73,6 +76,7 @@ class PymavlinkTransport(AutopilotTransport):
         )
 
     def publish_setpoint(self, command: AutopilotSetpointCommand) -> None:
+        """Send a SET_POSITION_TARGET_LOCAL_NED message to the autopilot."""
         target_system, target_component = self._resolve_target_ids()
         self.master.mav.set_position_target_local_ned_send(
             command.time_boot_ms,
@@ -94,12 +98,15 @@ class PymavlinkTransport(AutopilotTransport):
         )
 
     def arm(self) -> None:
+        """Send a MAV_CMD_COMPONENT_ARM_DISARM (arm) command."""
         self._send_arm_command(1.0)
 
     def disarm(self) -> None:
+        """Send a MAV_CMD_COMPONENT_ARM_DISARM (disarm) command."""
         self._send_arm_command(0.0)
 
     def set_offboard_mode(self) -> None:
+        """Request the autopilot switch to the configured offboard mode."""
         mode_mapping = self.master.mode_mapping()
         if not mode_mapping or self.offboard_mode not in mode_mapping:
             raise RuntimeError(f"Autopilot mode '{self.offboard_mode}' is not available")

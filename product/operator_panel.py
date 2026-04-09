@@ -49,6 +49,8 @@ def _shot_mode_label(mode: ShotMode) -> str:
 
 @dataclass(frozen=True)
 class OperatorPanelViewState:
+    """Immutable snapshot of labels and badge for the operator UI."""
+
     mission_label: str
     lock_label: str
     recording_label: str
@@ -81,17 +83,21 @@ class OperatorPanelController:
         self._deferred_commands: list[AppCommand] = []
 
     def clamp_distance(self, meters: float) -> float:
+        """Clamp *meters* to the configured min/max range."""
         return max(self.min_distance_m, min(self.max_distance_m, float(meters)))
 
     def set_selected_distance(self, meters: float) -> float:
+        """Update the selected follow distance and return the clamped value."""
         self.selected_distance_m = self.clamp_distance(meters)
         return self.selected_distance_m
 
     def set_selected_shot_mode(self, shot_mode: ShotMode) -> ShotMode:
+        """Update the selected shot mode and return it."""
         self.selected_shot_mode = shot_mode
         return self.selected_shot_mode
 
     def launch_commands(self, timestamp: float | None = None) -> list[AppCommand]:
+        """Build the start + distance + deferred shot-mode commands."""
         ts = time.time() if timestamp is None else timestamp
         plan = self.adapter.launch_plan(ts, requested_shot_mode=self.selected_shot_mode)
         self._deferred_until_state = plan.deferred_until_state
@@ -102,6 +108,7 @@ class OperatorPanelController:
         ]
 
     def maybe_emit_deferred_commands(self, snapshot: ProductSnapshot) -> list[AppCommand]:
+        """Emit deferred commands once the mission reaches the expected state."""
         if not self._deferred_until_state or not self._deferred_commands:
             return []
         if snapshot.mission.mission_state.value != self._deferred_until_state:
@@ -112,14 +119,17 @@ class OperatorPanelController:
         return commands
 
     def distance_command(self, timestamp: float | None = None) -> AppCommand:
+        """Create a distance command from the currently selected distance."""
         ts = time.time() if timestamp is None else timestamp
         return self.adapter.set_distance(ts, self.selected_distance_m)
 
     def mode_command(self, timestamp: float | None = None) -> AppCommand:
+        """Create a shot-mode command from the currently selected mode."""
         ts = time.time() if timestamp is None else timestamp
         return self.adapter.set_mode(ts, self.selected_shot_mode)
 
     def build_view_state(self, snapshot: ProductSnapshot | None = None) -> OperatorPanelViewState:
+        """Derive UI labels and badge from the latest product snapshot."""
         if snapshot is None:
             return OperatorPanelViewState(
                 mission_label="Idle",
@@ -355,6 +365,7 @@ class OperatorControlPanel:
         self._emit_distance()
 
     def apply_snapshot(self, snapshot: ProductSnapshot) -> None:
+        """Update the panel with a new product snapshot."""
         self.last_snapshot = snapshot
         self._apply_view_state(self.controller.build_view_state(snapshot))
         for command in self.controller.maybe_emit_deferred_commands(snapshot):

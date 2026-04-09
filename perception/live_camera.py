@@ -43,6 +43,8 @@ LOCK_COLORS = {
 
 @dataclass
 class LiveTrackerParams:
+    """Tunable knobs for the OpenCV-based live person tracker."""
+
     max_corners: int = 80
     min_corners: int = 12
     feature_quality: float = 0.01
@@ -245,6 +247,7 @@ class LiveCameraTracker:
         self.reset()
 
     def reset(self) -> None:
+        """Clear all tracking state and start fresh."""
         self.lock_manager = IdentityLockManager(self.lock_params)
         self.prev_gray: Optional[np.ndarray] = None
         self.prev_points: Optional[np.ndarray] = None
@@ -263,6 +266,7 @@ class LiveCameraTracker:
         self._face_bbox: Optional[tuple[int, int, int, int]] = None  # last detected face rect
 
     def initialize_target(self, frame: np.ndarray, bbox: tuple[int, int, int, int]) -> None:
+        """Enroll a target from *frame* inside *bbox* (x, y, w, h)."""
         x, y, w, h = bbox
         self.current_bbox = (float(x), float(y), float(w), float(h))
         self.prev_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -272,6 +276,7 @@ class LiveCameraTracker:
         self.last_timestamp = None
 
     def process(self, frame: np.ndarray, timestamp: float) -> tuple[object, dict]:
+        """Run one tracking cycle and return ``(lock_result, debug_dict)``."""
         self.frame_id += 1
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         height, width = gray.shape

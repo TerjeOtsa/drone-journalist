@@ -21,6 +21,8 @@ if TYPE_CHECKING:
 
 @dataclass
 class ShotParams:
+    """Camera framing, smoothing, and face-aware positioning for each shot mode."""
+
     # ── Distance & altitude (metres) ────────────────────────────────────
     standup_distance: float     = 4.0    # metres in front of subject
     standup_altitude: float     = 1.8    # metres AGL (≈ eye level)
@@ -68,6 +70,8 @@ class ShotParams:
 
 @dataclass
 class StabilityParams:
+    """Wind, oscillation, and drift thresholds for the stability supervisor."""
+
     # ── Wind thresholds (m/s) ───────────────────────────────────────────
     wind_marginal: float        = 5.0    # above → MARGINAL
     wind_degraded: float        = 8.0    # above → DEGRADED
@@ -99,6 +103,8 @@ class StabilityParams:
 
 @dataclass
 class MissionParams:
+    """Timing and threshold knobs for the mission state machine."""
+
     takeoff_altitude: float          = 2.5   # metres AGL
     takeoff_timeout_s: float         = 15.0  # seconds before abort
     acquire_timeout_s: float         = 20.0  # seconds to find subject
@@ -117,6 +123,8 @@ class MissionParams:
 
 @dataclass
 class SafetyParams:
+    """Geofence, battery, link-loss, and proximity thresholds for the safety module."""
+
     # ── Geofence (legacy cylinder — used as fallback if no polygon given) ───
     geofence_radius: float       = 100.0   # metres from home (cylinder)
     geofence_ceiling: float      = 30.0    # metres AGL
@@ -150,6 +158,8 @@ class SafetyParams:
 
 @dataclass
 class FlightInterfaceParams:
+    """Rate and timeout knobs for the 50 Hz flight interface bridge."""
+
     setpoint_rate_hz: float      = 50.0
     mavlink_system_id: int       = 1
     mavlink_component_id: int    = 191    # COMP_ID_ONBOARD_COMPUTER
@@ -159,6 +169,8 @@ class FlightInterfaceParams:
 
 @dataclass
 class SimulationParams:
+    """Physics, battery, perception, and subject-motion model for the simulator."""
+
     random_seed: int            = 7
     home_lat: float             = 59.9
     home_lon: float             = 10.7
@@ -241,6 +253,8 @@ class SimulationParams:
 
 @dataclass
 class SystemConfig:
+    """Master configuration aggregating all sub-configs for the autonomy stack."""
+
     shot: ShotParams = field(default_factory=ShotParams)
     stability: StabilityParams = field(default_factory=StabilityParams)
     mission: MissionParams = field(default_factory=MissionParams)

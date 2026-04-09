@@ -70,6 +70,7 @@ class SafetyModule:
         self._last_heartbeat = self.clock.monotonic() if now_s is None else now_s
 
     def request_emergency_stop(self) -> None:
+        """Latch the emergency flag; next ``update()`` will emit EMERGENCY_STOP."""
         self._emergency_requested = True
 
     def update(

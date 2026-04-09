@@ -51,24 +51,29 @@ log = logging.getLogger("sim")
 
 
 def clamp(value: float, low: float, high: float) -> float:
+    """Clamp *value* to the ``[low, high]`` interval."""
     return max(low, min(high, value))
 
 
 def wrap_angle(angle: float) -> float:
+    """Wrap an angle to the ``(-π, π]`` range."""
     return math.atan2(math.sin(angle), math.cos(angle))
 
 
 def alpha_from_tau(dt: float, tau: float) -> float:
+    """Compute exponential low-pass filter coefficient from time constant *tau*."""
     if tau <= 1e-6:
         return 1.0
     return 1.0 - math.exp(-dt / tau)
 
 
 def lpf_scalar(prev: float, new: float, alpha: float) -> float:
+    """First-order low-pass filter step on a scalar value."""
     return prev + alpha * (new - prev)
 
 
 def lpf_vec(prev: Vec3, new: Vec3, alpha: float) -> Vec3:
+    """First-order low-pass filter step on a Vec3."""
     return Vec3(
         lpf_scalar(prev.x, new.x, alpha),
         lpf_scalar(prev.y, new.y, alpha),
@@ -77,6 +82,7 @@ def lpf_vec(prev: Vec3, new: Vec3, alpha: float) -> Vec3:
 
 
 def add_noise(rng: random.Random, vec: Vec3, std_xy: float, std_z: float | None = None) -> Vec3:
+    """Add Gaussian noise to a Vec3 (separate XY and Z standard deviations)."""
     std_z = std_xy if std_z is None else std_z
     return Vec3(
         vec.x + rng.gauss(0.0, std_xy),
@@ -86,6 +92,7 @@ def add_noise(rng: random.Random, vec: Vec3, std_xy: float, std_z: float | None 
 
 
 def geo_from_local(home_lat: float, home_lon: float, home_alt_msl: float, ned_pos: Vec3) -> GeoPoint:
+    """Convert a local NED position to a geodetic point relative to the home."""
     meters_per_deg_lat = 111_320.0
     meters_per_deg_lon = max(1.0, meters_per_deg_lat * math.cos(math.radians(home_lat)))
     return GeoPoint(
@@ -96,6 +103,7 @@ def geo_from_local(home_lat: float, home_lon: float, home_alt_msl: float, ned_po
 
 
 def ned_to_body(vec: Vec3, attitude: Vec3) -> Vec3:
+    """Rotate a NED-frame vector into the body frame given Euler angles."""
     roll = attitude.x
     pitch = attitude.y
     yaw = attitude.z
@@ -119,6 +127,7 @@ def ned_to_body(vec: Vec3, attitude: Vec3) -> Vec3:
 
 
 def body_to_camera(vec: Vec3, camera_down_tilt_rad: float) -> Vec3:
+    """Rotate a body-frame vector into the camera frame given a downward tilt."""
     ctilt = math.cos(camera_down_tilt_rad)
     stilt = math.sin(camera_down_tilt_rad)
     return Vec3(
@@ -129,6 +138,7 @@ def body_to_camera(vec: Vec3, camera_down_tilt_rad: float) -> Vec3:
 
 
 def body_z_axis_ned(attitude: Vec3) -> Vec3:
+    """Return the body-frame Z axis expressed in NED for the given Euler angles."""
     roll = attitude.x
     pitch = attitude.y
     yaw = attitude.z
@@ -149,6 +159,8 @@ def body_z_axis_ned(attitude: Vec3) -> Vec3:
 
 @dataclass
 class DroneTruth:
+    """Ground-truth drone state before sensor noise and filtering."""
+
     position: Vec3
     velocity: Vec3
     attitude: Vec3
@@ -159,6 +171,8 @@ class DroneTruth:
 
 @dataclass
 class PerceptionFrame:
+    """Single timestamped snapshot used for perception-delay modelling."""
+
     timestamp: float
     subject_pos: Vec3
     subject_vel: Vec3
@@ -167,12 +181,16 @@ class PerceptionFrame:
 
 @dataclass
 class ScenarioEvent:
+    """Timed action injected into a simulation run (e.g. wind gust, lock loss)."""
+
     time: float
     action: str
     params: dict = field(default_factory=dict)
 
 
 class WindField:
+    """Dynamic wind model with mean, gust, turbulence, and a noisy estimator."""
+
     def __init__(self, params: SimulationParams, seed: int) -> None:
         self.p = params
         self.rng = random.Random(seed)
@@ -182,9 +200,11 @@ class WindField:
         self.estimate = Vec3()
 
     def set_target(self, target: Vec3) -> None:
+        """Set the wind target that the mean will track toward."""
         self.target = target
 
     def step(self, dt: float) -> Vec3:
+        """Advance the wind model by *dt* seconds and return the true wind."""
         mean_alpha = alpha_from_tau(dt, self.p.wind_response_tau_s)
         self.mean = lpf_vec(self.mean, self.target, mean_alpha)
 
@@ -210,6 +230,8 @@ class WindField:
 
 
 class BatteryModel:
+    """State-of-charge, voltage sag, and current-draw model for a LiPo pack."""
+
     def __init__(self, params: SimulationParams) -> None:
         self.p = params
         self.remaining_mah = params.battery_capacity_mah
@@ -232,6 +254,7 @@ class BatteryModel:
         return max(self.p.battery_cells * 3.15, pack_voltage)
 
     def update(self, dt: float, throttle_fraction: float, airspeed_mps: float, climb_rate_mps: float) -> None:
+        """Drain battery by estimated current over *dt* seconds."""
         maneuver_load = 0.9 * airspeed_mps + 1.8 * max(0.0, climb_rate_mps)
         throttle_load = self.p.hover_current_a + throttle_fraction * (self.p.max_current_a - self.p.hover_current_a)
         self.last_current_a = clamp(0.6 * throttle_load + maneuver_load, 0.0, self.p.max_current_a)
@@ -242,6 +265,8 @@ class BatteryModel:
 
 
 class RealisticPhysics:
+    """Simplified but plausible quadrotor dynamics with thrust, drag, and ground effects."""
+
     def __init__(self, params: SimulationParams, seed: int) -> None:
         self.p = params
         self.rng = random.Random(seed)
@@ -268,6 +293,7 @@ class RealisticPhysics:
         self._last_dt = 0.02
 
     def truth(self, true_wind: Vec3) -> DroneTruth:
+        """Return the ground-truth state snapshot for the current timestep."""
         return DroneTruth(
             position=Vec3(self.pos.x, self.pos.y, self.pos.z),
             velocity=Vec3(self.vel.x, self.vel.y, self.vel.z),
@@ -289,6 +315,7 @@ class RealisticPhysics:
         gust: Vec3,
         battery: BatteryModel,
     ) -> None:
+        """Advance the physics model by *dt* seconds given a setpoint and environment."""
         self._last_dt = dt
 
         if sp is None or not self.armed:
@@ -420,6 +447,7 @@ class RealisticPhysics:
         wind_estimate: Vec3,
         sim_time: float,
     ) -> DroneTelemetry:
+        """Build a noisy, filtered telemetry message mimicking a real autopilot."""
         est_alpha = alpha_from_tau(self._last_dt, self.p.state_estimate_tau_s)
 
         noisy_pos = add_noise(self.rng, self.pos, self.p.position_noise_std, self.p.position_noise_std * 0.7)
@@ -563,6 +591,8 @@ class RealisticPhysics:
 
 
 class FakePerception:
+    """Camera-geometry-based perception model with latency and lock state."""
+
     def __init__(self, params: SimulationParams, seed: int) -> None:
         self.p = params
         self.rng = random.Random(seed)
@@ -582,6 +612,7 @@ class FakePerception:
         self._history: Deque[PerceptionFrame] = deque()
 
     def advance(self, dt: float) -> None:
+        """Update subject motion (position, velocity, heading, stride phase)."""
         desired_vel = Vec3()
         if self.walking:
             desired_vel = Vec3(
@@ -624,6 +655,7 @@ class FakePerception:
         )
 
     def observe(self, sim_t: float, drone_truth: DroneTruth) -> TargetTrack:
+        """Produce a delayed, noisy TargetTrack from the current perception state."""
         self._history.append(
             PerceptionFrame(
                 timestamp=sim_t,
@@ -648,12 +680,14 @@ class FakePerception:
         return self._build_track(sim_t, frame)
 
     def force_lock(self, sim_t: float) -> None:
+        """Immediately lock onto the subject (operator assist)."""
         self.lock = LockState.LOCKED
         self._was_locked = True
         self._assist_lock_until = sim_t + 3.0
         self._candidate_since = sim_t
 
     def force_lost(self, duration: float, sim_t: float) -> None:
+        """Force a lock-loss lasting *duration* seconds."""
         self.lock = LockState.LOST
         self._lost_until = sim_t + duration
         self._candidate_since = None
@@ -917,40 +951,50 @@ class SimulationSession:
         self.records: List[dict] = []
 
     def step(self, steps: int = 1) -> dict:
+        """Advance the simulation by *steps* ticks and return the latest record."""
         for _ in range(max(1, steps)):
             self._step_once()
         assert self.latest_record is not None
         return self.latest_record
 
     def start(self) -> None:
+        """Inject a mission-start command."""
         self.apply_event("start")
 
     def stop(self) -> None:
+        """Inject a mission-stop command."""
         self.apply_event("stop")
 
     def force_lock(self) -> None:
+        """Force an immediate target lock (operator assist)."""
         self.apply_event("lock")
 
     def force_lost(self, duration: float = 3.0) -> None:
+        """Force a lock-loss lasting *duration* seconds."""
         self.apply_event("lost", {"duration": duration})
 
     def set_shot_mode(self, mode: ShotMode | str) -> None:
+        """Switch the active shot mode."""
         mode_value = mode.value if isinstance(mode, ShotMode) else str(mode)
         self.apply_event("shot", {"mode": mode_value})
 
     def set_distance(self, meters: float) -> None:
+        """Set the desired follow distance in metres."""
         self.apply_event("distance", {"meters": float(meters)})
 
     def set_wind_target(self, x: float, y: float, z: float = 0.0) -> None:
+        """Set the target mean wind vector (NED, m/s)."""
         self.wind_field.set_target(Vec3(float(x), float(y), float(z)))
 
     def set_subject_motion(self, *, walking: bool, speed: float, heading_deg: float) -> None:
+        """Configure subject walking state, speed, and heading."""
         heading_rad = math.radians(heading_deg)
         self.percep.walking = walking
         self.percep.walk_speed = max(0.0, speed)
         self.percep.walk_dir = Vec3(math.cos(heading_rad), math.sin(heading_rad), 0.0).normalized()
 
     def apply_event(self, action: str, params: dict | None = None) -> None:
+        """Apply a named scenario event immediately."""
         self._handle_event(ScenarioEvent(self.sim_t, action, params or {}))
 
     def _queue_command(self, command: AppCommand) -> None:

@@ -78,10 +78,12 @@ _PROFILES: dict[str, ProductProfile] = {
 
 
 def list_profiles() -> list[str]:
+    """Return sorted names of all registered product profiles."""
     return sorted(_PROFILES)
 
 
 def get_profile(name: str) -> ProductProfile:
+    """Look up a profile by *name*, raising ``ValueError`` if unknown."""
     try:
         return _PROFILES[name]
     except KeyError as exc:
@@ -89,10 +91,12 @@ def get_profile(name: str) -> ProductProfile:
 
 
 def default_profile() -> ProductProfile:
+    """Return the default 'walk' profile."""
     return get_profile("walk")
 
 
 def recording_policy(profile_name: str) -> RecordingPolicy:
+    """Derive recording timing policy from the named profile."""
     profile = get_profile(profile_name)
     return RecordingPolicy(
         pre_roll_sec=profile.pre_roll_sec,
@@ -103,4 +107,5 @@ def recording_policy(profile_name: str) -> RecordingPolicy:
 
 
 def build_runtime_config(profile_name: str = "walk") -> ProductRuntimeConfig:
+    """Build a fully-resolved runtime config from the named profile."""
     return ProductRuntimeConfig(active_profile=get_profile(profile_name))

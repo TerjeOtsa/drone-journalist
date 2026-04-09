@@ -174,7 +174,11 @@ def _parse_assertion(raw: dict) -> Assertion:
 def load_scenario(path: str | pathlib.Path) -> ScenarioSpec:
     """Load a single scenario from a YAML file."""
     with open(path, "r") as f:
-        data = yaml.safe_load(f)
+        raw = yaml.safe_load(f)
+    if not isinstance(raw, dict):
+        msg = f"Expected a YAML mapping in {path}, got {type(raw).__name__}"
+        raise ValueError(msg)
+    data: dict[str, Any] = raw
     return ScenarioSpec(
         name=data.get("name", pathlib.Path(path).stem),
         description=data.get("description", ""),
@@ -201,6 +205,8 @@ def discover_scenarios(directory: str | pathlib.Path) -> List[pathlib.Path]:
 
 @dataclass
 class ScenarioResult:
+    """Outcome of running a single regression scenario."""
+
     name: str
     passed: bool
     metrics: Dict[str, Any]
@@ -271,6 +277,7 @@ def run_all_scenarios(
 # ═══════════════════════════════════════════════════════════════════════════
 
 def main() -> None:
+    """CLI entry point for ``python -m sim.regression_runner``."""
     logging.basicConfig(
         level=logging.INFO,
         format="%(levelname)-5s  %(message)s",

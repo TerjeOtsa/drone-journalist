@@ -68,16 +68,20 @@ class MemoryAutopilotTransport:
         self.offboard_calls: int = 0
 
     def publish_setpoint(self, command: AutopilotSetpointCommand) -> None:
+        """Store *command* and increment the publish counter."""
         self.last_command = command
         self.published_commands += 1
 
     def arm(self) -> None:
+        """Record an arm request."""
         self.arm_calls += 1
 
     def disarm(self) -> None:
+        """Record a disarm request."""
         self.disarm_calls += 1
 
     def set_offboard_mode(self) -> None:
+        """Record an offboard-mode request."""
         self.offboard_calls += 1
 
 

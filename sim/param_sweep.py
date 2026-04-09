@@ -88,6 +88,7 @@ def _set_param(config: SystemConfig, path: str, value: Any) -> None:
 
 
 def _get_param(config: SystemConfig, path: str) -> Any:
+    """Read a nested parameter from a SystemConfig by dot-path."""
     parts = path.split(".")
     obj: Any = config
     for part in parts:
@@ -270,6 +271,7 @@ BUILTIN_SWEEPS = {
 # ═══════════════════════════════════════════════════════════════════════════
 
 def main() -> None:
+    """CLI entry point for ``python -m sim.param_sweep``."""
     logging.basicConfig(level=logging.WARNING, format="%(levelname)-5s  %(message)s")
 
     parser = argparse.ArgumentParser(description="Parameter sensitivity sweep")

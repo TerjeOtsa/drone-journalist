@@ -9,6 +9,8 @@ from dataclasses import dataclass
 
 @dataclass
 class IdentityLockParams:
+    """Weights, thresholds, and timing for the perception-side identity lock FSM."""
+
     # Identity fusion weights
     weight_body: float = 0.35
     weight_temporal: float = 0.20
